@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>replit</title>
+  <link href="style.css" rel="stylesheet" type="text/css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<style>
+  /* Add rounded table edges */
+  table {
+    border-collapse: collapse;
+    overflow: hidden;
+  }
+
+  th,
+  td {
+    padding: 3px;
+    border: 1px solid #000;
+    /* Adjust border styles as needed */
+  }
+
+  button {
+    border-radius: 6px;
+  }
+</style>
+
+<body style="background-color:#dceefc;">
+  <h1 style="color:darkblue;">TobyHQ<br></h1>
+  <p>When PlayHQ lets us down</p><br>
+  <div id="teamStatsPage" style="display: none;">
+    <h3 style='color: darkblue;'>Team Stats</h3>
+    <canvas id="totalPointsChart" width="400" height="200"></canvas>
+    <canvas id="totalFoulsChart" width="400" height="200"></canvas>
+    <canvas id="averagePointsChart" width="400" height="200"></canvas>
+    <canvas id="totalPointsVsOpponentPointsChart" width="400" height="200"></canvas>
+    <button style="background-color: mediumseagreen;" onclick="goToHomePageFromTeamStats()">Back to Home</button>
+  </div>
+  <div id="homePage">
+    <button style="background-color: mediumseagreen;" onclick="goToTeamStats()">Team Stats</button><br><br>
+    <b>Player Stats: </b><br>
+    <button style="background-color: mediumseagreen;" onclick="displayPlayerStats('Zac Yates')">Zac Yates</button>
+    <button style="background-color: mediumseagreen;" onclick="displayPlayerStats('Toby Hauser')">Toby Hauser</button>
+    <button style="background-color: mediumseagreen;" onclick="displayPlayerStats('Eden Cantoni-Bud')">Eden
+      Cantoni-Bud</button>
+    <br>
+    <button style="background-color: mediumseagreen;" onclick="displayPlayerStats('Zach Banner')">Zach Banner</button>
+    <button style="background-color: mediumseagreen;" onclick="displayPlayerStats('Adam Bigos')">Adam Bigos</button>
+    <button style="background-color: mediumseagreen;" onclick="displayPlayerStats('Leon Feldman')">Leon Feldman</button>
+    <button style="background-color: mediumseagreen;" onclick="displayPlayerStats('Rene Freiberg')">Rene
+      Freiberg</button>
+
+    <hr color="grey" size="1" align="left">
+    <div id="myText"></div>
+  </div>
+  <div id="playerPage" style="display: none;">
+    <div id="playerStats"></div>
+    <br>
+    <div id="playerStatsTable"></div>
+    <button style="background-color: mediumseagreen;" onclick="goToHomePage()">Back to Home</button>
+  </div>
+  <div id="addGameSection">
+    <hr color="grey" size="1" align="left">
+    <h3 style='color: darkblue;'>Add Game</h3>
+    <hr>
+    Date(dd/mm/yy): <input id="date" type="text" name="Date">
+    <hr>
+    Our Score: <input id="ourScore" type="number" name="OurScore">
+    Their Score: <input id="theirScore" type="number" name="TheirScore">
+    <hr>
+    Yates: <input id="yf" type="number" name="YatesFouls" placeholder="Fouls">
+    <input id="yp" type="number" name="YatesPoints" placeholder="Points">
+    <hr>
+    Toby: <input id="tf" type="number" name="TobyFouls" placeholder="Fouls">
+    <input id="tp" type="number" name="TobyPoints" placeholder="Points">
+    <hr>
+    Eden: <input id="ef" type="number" name="EdenFouls" placeholder="Fouls">
+    <input id="ep" type="number" name="EdenPoints" placeholder="Points">
+    <hr>
+    Banner: <input id="bf" type="number" name="BannerFouls" placeholder="Fouls">
+    <input id="bp" type="number" name="BannerPoints" placeholder="Points">
+    <hr>
+    Adam: <input id="af" type="number" name="AdamFouls" placeholder="Fouls">
+    <input id="ap" type="number" name="AdamPoints" placeholder="Points">
+    <hr>
+    Leon: <input id="lf" type="number" name="LeonFouls" placeholder="Fouls">
+    <input id="lp" type="number" name="LeonPoints" placeholder="Points">
+    <hr>
+    Rene: <input id="rf" type="number" name="ReneFouls" placeholder="Fouls">
+    <input id="rp" type="number" name="RenePoints" placeholder="Points">
+    <hr>
+    <button style="background-color: mediumseagreen;" onclick="myFunction()">Submit</button>
+    <p id="demo"></p>
+  </div>
+  <div id="generatedTextContainer" style="display: none;">
+    <hr color="grey" size="1" align="left">
+    <h3 style='color: darkblue;'>Generated Text</h3>
+    <hr>
+    <pre id="generatedText"></pre>
+  </div>
+
+  <script>
+    document.body.style.zoom = "300%";
+    if (/Android|iPhone/i.test(navigator.userAgent)) {
+      document.body.style.zoom = "100%";
+    }
+
+    let games = ["3/2/24", 39, 17, 1, 7, 1, 2, 3, 5, 4, 16, "", "", 0, 9, 1, 0, "16/12/23", 25, 61, "", "", 0, 4, 0, 1, 0, 12, 0, 2, 1, 6, 0, 0, "9/12/23", 63, 35, 0, 19, 0, 4, 1, 6, 1, 24, 1, 2, 0, 8, "", "", "2/12/23", 23, 44, 2, 13, 0, 4, 1, 2, 2, 2, 0, 2, "", "", "", "", "25/11/23", 40, 49, 2, 14, 0, 0, 2, 0, 2, 24, 0, 0, 1, 2, "", "", "11/11/23", 32, 42, 2, 12, 0, 2, 0, 0, 4, 14, 1, 2, 3, 2, "", "", "4/11/23", 29, 42, 2, 12, 0, 2, 2, 1, 3, 14, 0, 0, "", "", "", "", "28/10/23", 19, 56, 0, 6, 0, 2, 1, 0, 4, 7, 0, 0, 2, 4, "", "", "21/10/23", 20, 47, 3, 10, 1, 2, 1, 0, 1, 4, 0, 4, 2, 0, "", "", "14/10/23", 35, 25, 3, 12, 1, 1, 1, 5, 1, 7, 0, 0, 2, 6, "", ""];
+    function goToTeamStats() {
+      // Hide the home page
+      document.getElementById("homePage").style.display = "none";
+      // Show the "Team Stats" page
+      document.getElementById("teamStatsPage").style.display = "block";
+      document.getElementById("addGameSection").style.display = "none";
+      // Call the function to generate and display team graphs
+      generateAndDisplayTeamStats();
+    }
+    function gameList() {
+      let display = [];
+      let filteredGames = [];
+      let gameCount = 0;
+
+      for (let i = 0; i < games.length; i += 17) {
+        const gameDate = games[i];
+        const piranhasScore = games[i + 1] || '';
+        const opponentScore = games[i + 2] || '';
+        display.push(`<br><b style="color: darkblue;">${gameDate} </b><p>Piranhas: ${piranhasScore}, Opponent: ${opponentScore}<table border="1">`);
+        display.push('<tr><th>Player Name</th><th>Fouls</th><th>Points</th></tr>');
+
+        const players = ['Zac Yates', 'Toby Hauser', 'Eden Cantoni-Bud', 'Zach Banner', 'Adam Bigos', 'Leon Feldman', 'Rene Freiberg'];
+
+        for (let j = 0; j < players.length; j++) {
+          const playerName = players[j];
+
+          // Skip absent players
+          if (games[i + 3 + j * 2] === "") {
+            continue;
+          }
+
+          const points = games[i + 3 + j * 2] || 0;
+          const fouls = games[i + 4 + j * 2] || 0;
+
+          display.push(`<tr><td>${playerName}</td><td>${points}</td><td>${fouls}</td></tr>`);
+        }
+
+        display.push('</table>');
+
+        filteredGames = filteredGames.concat(games.slice(i, i + 17));
+        gameCount++;
+      }
+
+      games = filteredGames; // Update the games array
+
+      document.getElementById("myText").innerHTML = display.join('');
+    }
+    gameList();
+    function myFunction() {
+      games.push(
+        date.value || '',
+        ourScore.value || '',
+        theirScore.value || '',
+        yf.value || '',
+        yp.value || '',
+        tf.value || '',
+        tp.value || '',
+        ef.value || '',
+        ep.value || '',
+        bf.value || '',
+        bp.value || '',
+        af.value || '',
+        ap.value || '',
+        lf.value || '',
+        lp.value || '',
+        rf.value || '',
+        rp.value || ''
+      );
+
+      // Generate text and display it
+      generateAndDisplayText();
+
+      gameList();
+    }
+    function goToHomePageFromTeamStats() {
+      // Show the home page
+      document.getElementById("homePage").style.display = "block";
+      // Hide the "Team Stats" page
+      document.getElementById("teamStatsPage").style.display = "none";
+      document.getElementById("addGameSection").style.display = "block";
+    }
+    function generateAndDisplayText() {
+      const generatedText = generateText();
+      document.getElementById("generatedText").textContent = generatedText;
+      document.getElementById("generatedTextContainer").style.display = "block";
+    }
+    function generateText() {
+      const lastIndex = games.length - 1;
+      const newGame = games.slice(lastIndex - 14, lastIndex + 1);
+
+      // Format the new game data as a string
+      const formattedText = newGame.map(value => (value !== undefined ? value : '"0"')).join(', ');
+
+      // Create the final text with line breaks
+      const finalText = `${formattedText}`;
+
+      return finalText;
+    }
+    function displayPlayerStats(playerName) {
+      const playerIndex = ['Zac Yates', 'Toby Hauser', 'Eden Cantoni-Bud', 'Zach Banner', 'Adam Bigos', 'Leon Feldman', 'Rene Freiberg'].indexOf(playerName);
+      if (playerIndex === -1) {
+        document.getElementById("playerStats").innerHTML = "Player not found.";
+        return;
+      }
+
+      const interval = 17; // Number of elements for each game entry
+      let playerStatsText = '<table border="1"><tr><th>Date</th><th>Fouls</th><th>Points</th></tr>';
+
+      for (let i = 0; i < games.length; i += interval) {
+        const gameDate = games[i];
+        const fouls = games[i + 3 + playerIndex * 2];
+        const points = games[i + 4 + playerIndex * 2];
+
+        // Skip games where the player is absent
+        if (fouls === "" || points === "") {
+          continue;
+        }
+
+        playerStatsText += `<tr><td>${gameDate}</td><td>${fouls || 0}</td><td>${points || 0}</td></tr>`;
+      }
+
+      playerStatsText += '</table>';
+
+      let totalPoints = 0;
+      let totalFouls = 0;
+      let totalGames = 0;
+
+      for (let i = 0; i < games.length; i += interval) {
+        // Skip games where the player is absent
+        if (games[i + 3 + playerIndex * 2] !== "" && games[i + 4 + playerIndex * 2] !== "") {
+          totalGames++;
+          totalFouls += Number(games[i + 3 + playerIndex * 2]) || 0;
+          totalPoints += Number(games[i + 4 + playerIndex * 2]) || 0;
+        }
+      }
+
+      const averagePoints = totalGames > 0 ? totalPoints / totalGames : 0;
+
+      const playerStatsText2 = `
+        <h3 style="color:darkblue">${playerName}'s Stats</h3><br>
+        Total Points: ${totalPoints}<br>
+        Total Fouls: ${totalFouls}<br>
+        Total Games: ${totalGames}<br>
+        Average Points: ${averagePoints.toFixed(2)}
+      `;
+
+      document.getElementById("playerStats").innerHTML = playerStatsText2;
+      document.getElementById("playerStatsTable").innerHTML = playerStatsText;
+      document.getElementById("homePage").style.display = "none";
+      document.getElementById("playerPage").style.display = "block";
+
+      // Hide the "Add Game" section when displaying player stats
+      document.getElementById("addGameSection").style.display = "none";
+    }
+    function goToHomePage() {
+      document.getElementById("homePage").style.display = "block";
+      document.getElementById("playerPage").style.display = "none";
+
+      // Show the "Add Game" section when returning to the home page
+      document.getElementById("addGameSection").style.display = "block";
+
+      // Hide the generated text container
+      document.getElementById("generatedTextContainer").style.display = "none";
+    }
+    function generateAndDisplayTeamStats() {
+      const players = ['Zac Yates', 'Toby Hauser', 'Eden Cantoni-Bud', 'Zach Banner', 'Adam Bigos', 'Leon Feldman', 'Rene Freiberg'];
+
+      // Get total points and fouls for each player
+      const totalPointsData = players.map(player => {
+        let totalPoints = 0;
+        for (let i = 0; i < games.length; i += 17) {
+          const playerIndex = players.indexOf(player);
+          totalPoints += Number(games[i + 4 + playerIndex * 2]) || 0;
+        }
+        return totalPoints;
+      });
+
+      const totalFoulsData = players.map(player => {
+        let totalFouls = 0;
+        for (let i = 0; i < games.length; i += 17) {
+          const playerIndex = players.indexOf(player);
+          totalFouls += Number(games[i + 3 + playerIndex * 2]) || 0;
+        }
+        return totalFouls;
+      });
+
+      // Calculate the average points per game
+      const averagePointsData = players.map(player => {
+        let totalPoints = 0;
+        let totalGames = 0;
+        for (let i = 0; i < games.length; i += 17) {
+          const playerIndex = players.indexOf(player);
+          const playerPoints = Number(games[i + 4 + playerIndex * 2]) || 0;
+          if (playerPoints !== 0) {
+            totalPoints += playerPoints;
+            totalGames++;
+          }
+        }
+        return totalGames > 0 ? totalPoints / totalGames : 0;
+      });
+
+      // Calculate total team points and total opponent points
+      const totalTeamPointsData = [];
+      const totalOpponentPointsData = [];
+
+      for (let i = 0; i < games.length; i += 17) {
+        let totalTeamPoints = 0;
+        let totalOpponentPoints = 0;
+        for (let j = 0; j < players.length; j++) {
+          const playerIndex = players.indexOf(players[j]);
+          totalTeamPoints += Number(games[i + 4 + playerIndex * 2]) || 0;
+        }
+        totalOpponentPoints += Number(games[i + 2]) || 0;
+        totalTeamPointsData.push(totalTeamPoints);
+        totalOpponentPointsData.push(totalOpponentPoints);
+      }
+
+      // Create bar chart for total points
+      const totalPointsChart = new Chart(document.getElementById('totalPointsChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: players,
+          datasets: [{
+            label: 'Total Points',
+            data: totalPointsData,
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+
+      // Create bar chart for total fouls
+      const totalFoulsChart = new Chart(document.getElementById('totalFoulsChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: players,
+          datasets: [{
+            label: 'Total Fouls',
+            data: totalFoulsData,
+            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+
+      // Create bar chart for average points per game
+      const averagePointsChart = new Chart(document.getElementById('averagePointsChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: players,
+          datasets: [{
+            label: 'Average Points per Game',
+            data: averagePointsData,
+            backgroundColor: 'rgba(255, 205, 86, 0.2)',
+            borderColor: 'rgba(255, 205, 86, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+
+      // Create line chart for total team points vs total opponent points
+      const totalPointsVsOpponentPointsChart = new Chart(document.getElementById('totalPointsVsOpponentPointsChart').getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: games.map((_, index) => `Game ${index + 1}`),
+          datasets: [{
+            label: 'Total Team Points',
+            data: totalTeamPointsData,
+            fill: false,
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 2
+          },
+          {
+            label: 'Total Opponent Points',
+            data: totalOpponentPointsData,
+            fill: false,
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 2
+          }]
+        },
+        options: {
+          scales: {
+            x: {
+              type: 'linear',
+              position: 'bottom',
+              min: 1,
+              max: games.length / 17, // Adjust max to the total number of games played
+            },
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    }
+    generateAndDisplayTeamStats();
+  </script>
+</body>
+
+</html>
